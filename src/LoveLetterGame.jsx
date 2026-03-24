@@ -1622,7 +1622,7 @@ export default function LoveLetterGame() {
           }}>
             将你的情书送到公主手中！<br/>
             2人对战，先获得 <b>{TOKENS_TO_WIN}</b> 个好感图钉的玩家获胜。<br/>
-            <span style={{fontSize: 12, color: "#8B1A1A"}}>🧠 高级AI：记牌算率 · 牧师情报利用 · 伯爵夫人诈唬 · 分阶段战术</span>
+            <span style={{fontSize: 12, color: "#8B1A1A"}}>🧠 提示：本游戏是著名桌游Love Letter的人机对战版本，由fanjiahao魔改，这款桌游是日本著名桌游设计师Seiji Kanai的作品</span>
           </div>
 
           {/* Personality Selector */}
