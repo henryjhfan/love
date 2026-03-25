@@ -559,7 +559,7 @@ export default function LoveLetterGame() {
 
   function startRound(rn, first) {
     const r = initRound();
-    setRound(r);
+    setRound({...r});
     setDrawnCard(null);
     setSelectedCard(null);
     setRevealInfo(null);
@@ -630,6 +630,7 @@ export default function LoveLetterGame() {
   // Player draws
   function playerDraw() {
     if (!round || round.deck.length === 0) return;
+    if (round.playerHand.length >= 2) return; // prevent extra draw
     const newDeck = [...round.deck];
     const card = newDeck.pop();
     setDrawnCard(card);
@@ -784,13 +785,13 @@ export default function LoveLetterGame() {
     if (aiCard === guess) {
       addLog(`🎯 猜中了！AI出局！`);
       r.aiAlive = false;
-      setRound(r);
+      setRound({...r});
       setRevealInfo({ type: "guard", correct: true, actual: aiCard });
       handleRoundEnd("player", r);
       return;
     } else {
       addLog("❌ 没猜中。");
-      setRound(r);
+      setRound({...r});
       setRevealInfo({ type: "guard", correct: false });
       setPhase("showResult");
     }
@@ -807,7 +808,7 @@ export default function LoveLetterGame() {
         addLog("💀 你弃掉了公主，出局！");
         r.playerHand = [];
         r.playerAlive = false;
-        setRound(r);
+        setRound({...r});
         handleRoundEnd("ai", r);
         return;
       }
@@ -827,7 +828,7 @@ export default function LoveLetterGame() {
         addLog("AI弃掉了公主，AI出局！");
         r.aiHand = [];
         r.aiAlive = false;
-        setRound(r);
+        setRound({...r});
         handleRoundEnd("player", r);
         return;
       }
@@ -838,7 +839,7 @@ export default function LoveLetterGame() {
         r.aiHand = [r.hidden];
       }
     }
-    setRound(r);
+    setRound({...r});
     setSelectedCard(null);
     const w = checkRoundEnd(r);
     if (w) { handleRoundEnd(w, r); return; }
@@ -877,7 +878,7 @@ export default function LoveLetterGame() {
     r.deck = newDeck;
     r.aiHand = [...r.aiHand, card];
     r.aiProtected = false;
-    setRound(r);
+    setRound({...r});
     addLog(`AI抽了一张牌（牌堆剩${newDeck.length}张）`);
 
     setTimeout(() => {
@@ -900,7 +901,7 @@ export default function LoveLetterGame() {
     const playText = d("ai_play_card", { cardName: def.name, cardVal: playVal, emoji: def.emoji });
     setAiAction({ step: "play", card: playVal, text: playText });
     addLog(playText);
-    setRound(r);
+    setRound({...r});
 
     setTimeout(() => aiStep_resolve(r, playVal), 2400);
   }
@@ -912,7 +913,7 @@ export default function LoveLetterGame() {
       addLog(txt);
       r.aiAlive = false;
       setAiAction({ step: "effect", card: 8, text: txt });
-      setRound(r);
+      setRound({...r});
       setTimeout(() => handleRoundEnd("player", r), 3000);
       return;
     }
@@ -921,7 +922,7 @@ export default function LoveLetterGame() {
     if (playVal === 7) {
       addLog(d("countess_effect"));
       setAiAction({ step: "effect", card: 7, text: d("countess_effect"), subtext: d("countess_subtext") });
-      setRound(r);
+      setRound({...r});
       setTimeout(() => proceedToNextTurn(r, "ai"), 4000);
       return;
     }
@@ -931,7 +932,7 @@ export default function LoveLetterGame() {
       r.aiProtected = true;
       addLog(d("handmaid_effect"));
       setAiAction({ step: "effect", card: 4, text: d("handmaid_effect"), subtext: d("handmaid_subtext") });
-      setRound(r);
+      setRound({...r});
       setTimeout(() => proceedToNextTurn(r, "ai"), 4000);
       return;
     }
@@ -940,7 +941,7 @@ export default function LoveLetterGame() {
     if (r.playerProtected && playVal !== 5) {
       addLog(d("blocked_by_handmaid"));
       setAiAction({ step: "effect", card: playVal, text: d("blocked_by_handmaid"), subtext: d("blocked_subtext") });
-      setRound(r);
+      setRound({...r});
       setTimeout(() => proceedToNextTurn(r, "ai"), 4000);
       return;
     }
@@ -959,7 +960,7 @@ export default function LoveLetterGame() {
         addLog(d("guard_wrong"));
         r.aiKnowsPlayerCard = null;
       }
-      setRound(r);
+      setRound({...r});
       setRevealInfo({ type: "aiGuard", correct, guess, usedIntel });
       setAiAction(null);
       setPhase("showResult");
@@ -970,7 +971,7 @@ export default function LoveLetterGame() {
     if (playVal === 2) {
       r.aiKnowsPlayerCard = r.playerHand[0];
       addLog(d("priest_peek"));
-      setRound(r);
+      setRound({...r});
       setRevealInfo({ type: "aiPriest" });
       setAiAction(null);
       setPhase("showResult");
@@ -993,7 +994,7 @@ export default function LoveLetterGame() {
       } else {
         addLog(d("baron_tie"));
       }
-      setRound(r);
+      setRound({...r});
       setRevealInfo({ type: "aiBaron", playerCard, aiCard });
       setAiAction(null);
       const w = checkRoundEnd(r);
@@ -1030,7 +1031,7 @@ export default function LoveLetterGame() {
         addLog(`AI弃掉了 ${dDef.emoji}${dDef.name}(${disc})`);
         if (disc === 8) {
           r.aiAlive = false;
-          setRound(r);
+          setRound({...r});
           setRevealInfo({ type: "aiPrinceSelf", discarded: disc, died: true });
           setAiAction(null);
           setPhase("showResult");
@@ -1042,7 +1043,7 @@ export default function LoveLetterGame() {
         } else {
           r.aiHand = [r.hidden];
         }
-        setRound(r);
+        setRound({...r});
         setRevealInfo({ type: "aiPrinceSelf", discarded: disc, died: false });
         setAiAction(null);
         setPhase("showResult");
@@ -1053,7 +1054,7 @@ export default function LoveLetterGame() {
         addLog(d("prince_discard_log", { discName: `${dDef.emoji}${dDef.name}(${disc})`, discEmoji: dDef.emoji }));
         if (disc === 8) {
           r.playerAlive = false;
-          setRound(r);
+          setRound({...r});
           setRevealInfo({ type: "aiPrincePlayer", discarded: disc, died: true });
           setAiAction(null);
           setPhase("showResult");
@@ -1066,7 +1067,7 @@ export default function LoveLetterGame() {
           r.playerHand = [r.hidden];
         }
         r.aiKnowsPlayerCard = null;
-        setRound(r);
+        setRound({...r});
         setRevealInfo({ type: "aiPrincePlayer", discarded: disc, died: false });
         setAiAction(null);
         setPhase("showResult");
@@ -1079,7 +1080,7 @@ export default function LoveLetterGame() {
       if (r.playerProtected) {
         addLog(d("king_blocked"));
         setAiAction({ step: "effect", card: 6, text: d("king_blocked") });
-        setRound(r);
+        setRound({...r});
         setTimeout(() => proceedToNextTurn(r, "ai"), 4000);
       } else {
         const temp = [...r.playerHand];
@@ -1089,7 +1090,7 @@ export default function LoveLetterGame() {
         addLog(d("king_swap"));
         const gotDef = getCardDef(r.playerHand[0]);
         addLog(`你现在持有 ${gotDef.emoji}${gotDef.name}(${gotDef.value})`);
-        setRound(r);
+        setRound({...r});
         setRevealInfo({ type: "aiKing", got: r.playerHand[0] });
         setAiAction(null);
         setPhase("showResult");
@@ -1622,7 +1623,7 @@ export default function LoveLetterGame() {
           }}>
             将你的情书送到公主手中！<br/>
             2人对战，先获得 <b>{TOKENS_TO_WIN}</b> 个好感图钉的玩家获胜。<br/>
-            <span style={{fontSize: 12, color: "#8B1A1A"}}>🧠 提示：本游戏是著名桌游Love Letter的人机对战版本，由fanjiahao魔改，这款桌游是日本著名桌游设计师Seiji Kanai的作品</span>
+            <span style={{fontSize: 12, color: "#8B1A1A"}}>🧠 高级AI：记牌算率 · 牧师情报利用 · 伯爵夫人诈唬 · 分阶段战术</span>
           </div>
 
           {/* Personality Selector */}
